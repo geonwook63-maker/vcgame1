@@ -13,6 +13,73 @@ const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
 const soundButton = document.getElementById("soundButton");
 
+const recordPanel = document.getElementById("recordPanel");
+const recordForm = document.getElementById("recordForm");
+const recordSummary = document.getElementById("recordSummary");
+const recordMessage = document.getElementById("recordMessage");
+const nicknameInput = document.getElementById("nickname");
+const skipRecordButton = document.getElementById("skipRecord");
+const rankingBody = document.getElementById("rankingBody");
+const clearRankingButton = document.getElementById("clearRanking");
+const RANKING_KEY = "jump-runner-ranking-v1";
+let recordPending = false;
+let finalRecord = null;
+
+function readRanking() {
+  try {
+    const data = JSON.parse(localStorage.getItem(RANKING_KEY) || "[]");
+    return Array.isArray(data) ? data.filter(r => r && typeof r.name === "string" &&
+      Number.isFinite(r.passed) && Number.isFinite(r.seconds) && typeof r.date === "string") : [];
+  } catch { return []; }
+}
+function sortRanking(records) {
+  return records.sort((a, b) => b.passed - a.passed || a.seconds - b.seconds || a.date.localeCompare(b.date)).slice(0, 10);
+}
+function renderRanking() {
+  rankingBody.replaceChildren();
+  const ranking = sortRanking(readRanking());
+  if (!ranking.length) {
+    const row = rankingBody.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 6;
+    cell.className = "ranking-empty";
+    cell.textContent = "아직 기록이 없어요. 첫 번째 도전자가 되어 보세요!";
+    return;
+  }
+  ranking.forEach((entry, i) => {
+    const row = rankingBody.insertRow();
+    [String(i + 1), entry.name, entry.won ? "승리" : "패배", `${entry.passed}/15`, `${entry.seconds.toFixed(1)}초`, entry.date.slice(0, 10)].forEach(value => {
+      row.insertCell().textContent = value;
+    });
+  });
+}
+function closeRecordPanel() {
+  recordPending = false;
+  finalRecord = null;
+  recordPanel.hidden = true;
+}
+recordForm.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!recordPending || !finalRecord) return;
+  const name = nicknameInput.value.trim();
+  if (!name || name.length > 12) { recordMessage.textContent = "닉네임을 1~12자로 입력해 주세요."; return; }
+  const records = sortRanking([...readRanking(), { ...finalRecord, name }]);
+  try {
+    localStorage.setItem(RANKING_KEY, JSON.stringify(records));
+  } catch {
+    recordMessage.textContent = "저장할 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.";
+    return;
+  }
+  closeRecordPanel();
+  renderRanking();
+});
+skipRecordButton.addEventListener("click", closeRecordPanel);
+clearRankingButton.addEventListener("click", () => {
+  if (!window.confirm("이 브라우저에 저장된 TOP 10 기록을 모두 삭제할까요?")) return;
+  try { localStorage.removeItem(RANKING_KEY); } catch { /* 접근 제한 시 무시 */ }
+  renderRanking();
+});
+
 const W = canvas.width;
 const H = canvas.height;
 const GROUND = 320;
@@ -107,6 +174,7 @@ function playEndSound(won) {
 
 
 function reset() {
+  closeRecordPanel();
   state = "ready";
   playerY = GROUND - PLAYER.h;
   velocityY = 0;
@@ -145,6 +213,12 @@ function finish(won) {
   if (state !== "running") return; // 종료 효과음 중복 재생 방지
   state = won ? "won" : "lost";
   playEndSound(won);
+  finalRecord = { won, passed, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
+  recordPending = true;
+  nicknameInput.value = "";
+  recordMessage.textContent = "";
+  recordSummary.textContent = `${won ? "승리" : "패배"} · 장애물 ${passed}/${TARGET}개 통과 · ${elapsed.toFixed(1)}초`;
+  recordPanel.hidden = false;
   statusEl.textContent = won ? "승리!" : "게임 오버";
   showOverlay(
     won ? "YOU WIN!" : "GAME OVER",
@@ -274,6 +348,7 @@ function frame(timestamp) {
 
 window.addEventListener("keydown", event => {
   if (event.code !== "Space") return;
+  if (event.target instanceof HTMLElement && (event.target.closest("input, textarea, button, select") || event.target.isContentEditable)) return;
   event.preventDefault();
   if (event.repeat) return;
   jump();
@@ -288,4 +363,5 @@ soundButton.addEventListener("click", () => {
 });
 
 reset();
+renderRanking();
 requestAnimationFrame(frame);

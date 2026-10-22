@@ -35,6 +35,20 @@
           </div>
         </div>
       </div>
+      <section id="recordPanel" class="record-panel" hidden aria-labelledby="recordTitle">
+        <h2 id="recordTitle">플레이 기록 남기기</h2>
+        <p id="recordSummary"></p>
+        <form id="recordForm" class="record-form">
+          <label for="nickname">닉네임 (최대 12자)</label>
+          <div class="record-controls"><input id="nickname" name="nickname" type="text" maxlength="12" autocomplete="nickname" placeholder="닉네임 입력" required /><button type="submit">기록 저장</button><button type="button" id="skipRecord" class="secondary-button">건너뛰기</button></div>
+          <p id="recordMessage" class="record-message" role="status"></p>
+        </form>
+      </section>
+      <section class="ranking-panel" aria-labelledby="rankingTitle">
+        <div class="ranking-heading"><h2 id="rankingTitle">🏆 TOP 10 플레이 기록</h2><button type="button" id="clearRanking" class="secondary-button">기록 초기화</button></div>
+        <p class="ranking-caption">장애물 통과 수 내림차순 · 동점 시 플레이 시간 오름차순 · 이 브라우저에만 저장</p>
+        <div class="ranking-scroll"><table><thead><tr><th>순위</th><th>닉네임</th><th>결과</th><th>통과</th><th>시간</th><th>날짜</th></tr></thead><tbody id="rankingBody"></tbody></table></div>
+      </section>
       <div class="bottom-bar">
         <span><kbd>SPACE</kbd> 점프 / 시작 / 재시작</span>
         <div class="bottom-actions"><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
