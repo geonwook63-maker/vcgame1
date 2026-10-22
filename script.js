@@ -72,6 +72,40 @@ function playJumpSound() {
 }
 
 
+// 종료 효과음: 승리는 상승하는 3음, 패배는 하강하는 3음입니다.
+// 기존 효과음 ON/OFF 설정을 공통으로 적용합니다.
+function playEndSound(won) {
+  if (!soundEnabled) return;
+  prepareAudio();
+  if (!audioContext || audioContext.state !== "running") return;
+
+  const now = audioContext.currentTime;
+  const notes = won ? [523.25, 659.25, 783.99] : [392, 311.13, 196];
+  const duration = won ? 0.17 : 0.23;
+  const volume = won ? 0.12 : 0.11;
+
+  notes.forEach((frequency, index) => {
+    const startAt = now + index * duration;
+    const endAt = startAt + duration + 0.06;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = won ? "triangle" : "sine";
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, endAt);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(startAt);
+    oscillator.stop(endAt + 0.01);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      gain.disconnect();
+    };
+  });
+}
+
+
 function reset() {
   state = "ready";
   playerY = GROUND - PLAYER.h;
@@ -108,7 +142,9 @@ function jump() {
 }
 
 function finish(won) {
+  if (state !== "running") return; // 종료 효과음 중복 재생 방지
   state = won ? "won" : "lost";
+  playEndSound(won);
   statusEl.textContent = won ? "승리!" : "게임 오버";
   showOverlay(
     won ? "YOU WIN!" : "GAME OVER",
