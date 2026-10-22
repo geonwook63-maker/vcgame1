@@ -92,7 +92,10 @@ const STAGE_SIZE = 15;
 const TARGET = STAGE_SIZE * 3;
 // 실제 달린 월드 거리 10px당 1점. 정지/종료 중에는 점수가 오르지 않습니다.
 const PIXELS_PER_POINT = 10;
-function getScore() { return Math.floor(worldDistance / PIXELS_PER_POINT); }
+const NORMAL_OBSTACLE_BONUS = 100;
+const SPECIAL_OBSTACLE_BONUS = 200;
+let obstacleBonusScore = 0;
+function getScore() { return Math.floor(worldDistance / PIXELS_PER_POINT) + obstacleBonusScore; }
 // 단계마다 속도와 장애물 출현 간격을 변경합니다.
 // 간격은 점프 체공 시간(약 0.79초)보다 충분히 길게 유지합니다.
 const STAGES = [
@@ -240,6 +243,7 @@ function reset() {
   passed = 0;
   spawnTimer = 1.35;
   worldDistance = 0;
+  obstacleBonusScore = 0;
   elapsed = 0;
   currentStage = 0;
   spawned = 0;
@@ -349,6 +353,7 @@ function update(dt) {
     if (!obstacle.counted && obstacle.x + obstacle.w < PLAYER.x) {
       obstacle.counted = true;
       passed += 1;
+      obstacleBonusScore += obstacle.type === "normal" ? NORMAL_OBSTACLE_BONUS : SPECIAL_OBSTACLE_BONUS;
       if (passed < TARGET && stageIndexFor(passed) !== currentStage) {
         currentStage = stageIndexFor(passed);
         showStageNotice(currentStage);
