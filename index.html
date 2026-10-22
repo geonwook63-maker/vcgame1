@@ -14,7 +14,7 @@
     <header class="heading">
       <span class="eyebrow">ONE BUTTON ARCADE</span>
       <h1>JUMP <span>RUNNER</span></h1>
-      <p>스페이스바로 점프! 각 단계에서 장애물 15개씩, 총 45개를 돌파하면 승리합니다.</p>
+      <p>스페이스바를 연속 두 번 눌러 2단 점프! 각 단계 15개씩 총 45개 장애물을 돌파하세요.</p>
     </header>
 
     <section class="game-card" aria-label="점프 러너 게임">
@@ -33,7 +33,7 @@
             <h2 id="overlayTitle">달릴 준비 됐나요?</h2>
             <p id="overlayText">장애물을 뛰어넘어 결승점까지 도달하세요.</p>
             <button id="startButton" type="button">게임 시작 <span aria-hidden="true">→</span></button>
-            <span class="overlay-hint">스페이스바로 시작할 수도 있어요</span>
+            <span class="overlay-hint">스페이스바로 시작 · 연속 두 번 누르면 2단 점프</span>
           </div>
         </div>
       </div>
@@ -48,15 +48,15 @@
       </section>
       <section class="ranking-panel" aria-labelledby="rankingTitle">
         <div class="ranking-heading"><h2 id="rankingTitle">🏆 TOP 10 플레이 기록</h2><button type="button" id="clearRanking" class="secondary-button">기록 초기화</button></div>
-        <p class="ranking-caption">각 단계 15개 · 총 45개 완주 목표 · 달린 거리 점수 내림차순 · 동점 시 장애물 통과 수, 플레이 시간 순 · 이 브라우저에만 저장</p>
+        <p class="ranking-caption">각 단계 15개 (특수 장애물 3 / 6 / 8개) · 총 45개 완주 목표 · 달린 거리 점수 내림차순 · 동점 시 장애물 통과 수, 플레이 시간 순 · 이 브라우저에만 저장</p>
         <div class="ranking-scroll"><table><thead><tr><th>순위</th><th>닉네임</th><th>점수</th><th>결과</th><th>통과</th><th>시간</th><th>날짜</th></tr></thead><tbody id="rankingBody"></tbody></table></div>
       </section>
       <div class="bottom-bar">
-        <span><kbd>SPACE</kbd> 점프 / 시작 / 재시작</span>
+        <span><kbd>SPACE</kbd> 점프 · 공중에서 다시 누르면 2단 점프 / 시작 / 재시작</span>
         <div class="bottom-actions"><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
       </div>
     </section>
-    <p class="footer-note">장애물에 부딪히면 게임 오버 · 공중에서는 추가 점프 불가</p>
+    <p class="footer-note">장애물에 부딪히면 게임 오버 · 보라색(높은 장애물), 주황색(긴 장애물)은 2단 점프로 통과!</p>
   </main>
 </body>
 </html>

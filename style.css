@@ -13,3 +13,6 @@
 /* 거리 점수 강조: 우상단 숫자 표시 */
 .hud-item.right strong{color:#ffe08a;font-variant-numeric:tabular-nums;font-size:clamp(20px,3vw,28px)}
 .ranking-panel td:nth-child(3){font-weight:800;color:#ffe08a}
+
+/* 2단 점프와 특수 장애물 안내 */
+.footer-note{color:#c0cce3;line-height:1.6}

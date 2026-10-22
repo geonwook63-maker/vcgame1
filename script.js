@@ -96,9 +96,9 @@ function getScore() { return Math.floor(worldDistance / PIXELS_PER_POINT); }
 // 단계마다 속도와 장애물 출현 간격을 변경합니다.
 // 간격은 점프 체공 시간(약 0.79초)보다 충분히 길게 유지합니다.
 const STAGES = [
-  { name: "1단계 · 워밍업", speed: 300, minGap: 1.60, gapRandom: 0.30 },
-  { name: "2단계 · 가속", speed: 365, minGap: 1.40, gapRandom: 0.25 },
-  { name: "3단계 · 최종 도전", speed: 430, minGap: 1.25, gapRandom: 0.20 }
+  { name: "1단계 · 워밍업", speed: 300, minGap: 2.25, gapRandom: 0.30, special: 3 },
+  { name: "2단계 · 가속", speed: 365, minGap: 2.10, gapRandom: 0.25, special: 6 },
+  { name: "3단계 · 최종 도전", speed: 430, minGap: 2.00, gapRandom: 0.20, special: 8 }
 ];
 const stageEl = document.getElementById("stage");
 const stageNotice = document.getElementById("stageNotice");
@@ -113,11 +113,15 @@ function showStageNotice(index) {
 }
 const GRAVITY = 1900;
 const JUMP_VELOCITY = -750;
+const SECOND_JUMP_VELOCITY = -750;
+const MAX_JUMPS = 2;
 const PLAYER = { x: 125, w: 42, h: 52 };
 
 let state = "ready";
 let playerY = GROUND - PLAYER.h;
 let velocityY = 0;
+let jumpsUsed = 0;
+let stagePlans = [];
 let obstacles = [];
 let passed = 0;
 let spawnTimer = 0;
@@ -202,11 +206,36 @@ function playEndSound(won) {
 }
 
 
+// 단계마다 정확히 지정된 수의 특수 장애물을 섞어 배치합니다.
+// 게임을 다시 시작할 때마다 새로 셔플하여 순서가 달라집니다.
+function makeStagePlan(stageIndex) {
+  const specialCount = STAGES[stageIndex].special;
+  const types = Array(STAGE_SIZE - specialCount).fill("normal");
+  for (let i = 0; i < specialCount; i++) {
+    types.push(i % 2 === 0 ? "tall" : "wide");
+  }
+  for (let i = types.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [types[i], types[j]] = [types[j], types[i]];
+  }
+  return types;
+}
+
+function createObstacle(type, stageIndex) {
+  const speed = STAGES[stageIndex].speed;
+  if (type === "tall") return { type, x: W + 30, w: 36, h: 175, counted: false };
+  // 1단 점프의 전체 체공 시간보다 긴 폭: 2단 점프가 필요합니다.
+  if (type === "wide") return { type, x: W + 30, w: Math.round(speed * 0.91), h: 43, counted: false };
+  return { type, x: W + 30, w: 30, h: 38 + Math.random() * 12, counted: false };
+}
+
 function reset() {
   closeRecordPanel();
   state = "ready";
   playerY = GROUND - PLAYER.h;
   velocityY = 0;
+  jumpsUsed = 0;
+  stagePlans = STAGES.map((_, index) => makeStagePlan(index));
   obstacles = [];
   passed = 0;
   spawnTimer = 1.35;
@@ -235,8 +264,9 @@ function jump() {
     start();
     return;
   }
-  if (playerY >= GROUND - PLAYER.h - 0.5) {
-    velocityY = JUMP_VELOCITY;
+  if (jumpsUsed < MAX_JUMPS) {
+    velocityY = jumpsUsed === 0 ? JUMP_VELOCITY : SECOND_JUMP_VELOCITY;
+    jumpsUsed += 1;
     playJumpSound();
   }
 }
@@ -292,12 +322,14 @@ function update(dt) {
   if (playerY > GROUND - PLAYER.h) {
     playerY = GROUND - PLAYER.h;
     velocityY = 0;
+    jumpsUsed = 0;
   }
 
   spawnTimer -= dt;
   if (spawnTimer <= 0 && spawned < (currentStage + 1) * STAGE_SIZE) {
-    const height = 38 + Math.random() * 12;
-    obstacles.push({ x: W + 30, w: 30, h: height, counted: false });
+    const stageSlot = spawned - currentStage * STAGE_SIZE;
+    const type = stagePlans[currentStage][stageSlot];
+    obstacles.push(createObstacle(type, currentStage));
     spawned += 1;
     // 일정한 최소 간격을 보장해 모든 장애물을 점프로 넘을 수 있습니다.
     spawnTimer = stage.minGap + Math.random() * stage.gapRandom;
@@ -373,8 +405,17 @@ function draw() {
   }
 
   for (const obstacle of obstacles) {
-    roundedRect(obstacle.x, GROUND - obstacle.h, obstacle.w, obstacle.h, 5, "#ff6585");
-    roundedRect(obstacle.x + 5, GROUND - obstacle.h + 6, 6, obstacle.h - 12, 3, "#ff9bae");
+    const color = obstacle.type === "tall" ? "#b77aff" : obstacle.type === "wide" ? "#ffb44d" : "#ff6585";
+    const highlight = obstacle.type === "tall" ? "#dfbaff" : obstacle.type === "wide" ? "#ffe1a5" : "#ff9bae";
+    roundedRect(obstacle.x, GROUND - obstacle.h, obstacle.w, obstacle.h, 5, color);
+    roundedRect(obstacle.x + 5, GROUND - obstacle.h + 6, Math.max(6, obstacle.w - 10), 6, 3, highlight);
+    if (obstacle.type !== "normal") {
+      ctx.fillStyle = "#172440";
+      ctx.font = "bold 15px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("×2", obstacle.x + obstacle.w / 2, GROUND - obstacle.h / 2 + 5);
+      ctx.textAlign = "start";
+    }
   }
 
   const bob = state === "running" && velocityY === 0 ? Math.sin(elapsed * 18) * 2 : 0;
