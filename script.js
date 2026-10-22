@@ -84,6 +84,25 @@ const W = canvas.width;
 const H = canvas.height;
 const GROUND = 320;
 const TARGET = 15;
+const STAGE_SIZE = 5;
+// 단계마다 속도와 장애물 출현 간격을 변경합니다.
+// 간격은 점프 체공 시간(약 0.79초)보다 충분히 길게 유지합니다.
+const STAGES = [
+  { name: "1단계 · 워밍업", speed: 300, minGap: 1.60, gapRandom: 0.30 },
+  { name: "2단계 · 가속", speed: 365, minGap: 1.40, gapRandom: 0.25 },
+  { name: "3단계 · 최종 도전", speed: 430, minGap: 1.25, gapRandom: 0.20 }
+];
+const stageEl = document.getElementById("stage");
+const stageNotice = document.getElementById("stageNotice");
+let noticeTimeout = 0;
+function stageIndexFor(passedCount) {
+  return Math.min(STAGES.length - 1, Math.floor(passedCount / STAGE_SIZE));
+}
+function showStageNotice(index) {
+  stageNotice.textContent = `${STAGES[index].name} 시작!`;
+  stageNotice.classList.add("visible");
+  noticeTimeout = 1.8;
+}
 const GRAVITY = 1900;
 const JUMP_VELOCITY = -750;
 const PLAYER = { x: 125, w: 42, h: 52 };
@@ -97,6 +116,7 @@ let spawnTimer = 0;
 let worldDistance = 0;
 let lastTime = 0;
 let elapsed = 0;
+let currentStage = 0;
 
 // 외부 음원 파일 없이 브라우저에서 점프 효과음을 직접 생성합니다.
 // 브라우저의 자동재생 제한 때문에 최초 사용자 입력 후 AudioContext를 시작합니다.
@@ -183,6 +203,9 @@ function reset() {
   spawnTimer = 1.35;
   worldDistance = 0;
   elapsed = 0;
+  currentStage = 0;
+  noticeTimeout = 0;
+  stageNotice.classList.remove("visible");
   updateHud();
   statusEl.textContent = "준비";
   showOverlay("READY?", "달릴 준비 됐나요?", "장애물을 뛰어넘어 결승점까지 도달하세요.", "게임 시작");
@@ -195,6 +218,7 @@ function start() {
   state = "running";
   statusEl.textContent = "달리는 중";
   overlay.classList.add("hidden");
+  showStageNotice(0);
   // 버튼 클릭으로 시작했을 때 첫 점프는 별도 입력으로 진행합니다.
 }
 
@@ -212,12 +236,13 @@ function jump() {
 function finish(won) {
   if (state !== "running") return; // 종료 효과음 중복 재생 방지
   state = won ? "won" : "lost";
+  stageNotice.classList.remove("visible");
   playEndSound(won);
-  finalRecord = { won, passed, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
+  finalRecord = { won, passed, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
   recordPending = true;
   nicknameInput.value = "";
   recordMessage.textContent = "";
-  recordSummary.textContent = `${won ? "승리" : "패배"} · 장애물 ${passed}/${TARGET}개 통과 · ${elapsed.toFixed(1)}초`;
+  recordSummary.textContent = `${won ? "승리" : "패배"} · ${STAGES[currentStage].name} · 장애물 ${passed}/${TARGET}개 통과 · ${elapsed.toFixed(1)}초`;
   recordPanel.hidden = false;
   statusEl.textContent = won ? "승리!" : "게임 오버";
   showOverlay(
@@ -239,12 +264,18 @@ function showOverlay(badge, title, description, buttonLabel) {
 function updateHud() {
   scoreEl.textContent = passed;
   progressEl.style.width = `${(passed / TARGET) * 100}%`;
+  stageEl.textContent = `${currentStage + 1} / ${STAGES.length}`;
 }
 
 function update(dt) {
   if (state !== "running") return;
   elapsed += dt;
-  const speed = Math.min(440, 330 + passed * 6);
+  if (noticeTimeout > 0) {
+    noticeTimeout -= dt;
+    if (noticeTimeout <= 0) stageNotice.classList.remove("visible");
+  }
+  const stage = STAGES[currentStage];
+  const speed = stage.speed;
   worldDistance += speed * dt;
 
   velocityY += GRAVITY * dt;
@@ -259,7 +290,7 @@ function update(dt) {
     const height = 38 + Math.random() * 12;
     obstacles.push({ x: W + 30, w: 30, h: height, counted: false });
     // 일정한 최소 간격을 보장해 모든 장애물을 점프로 넘을 수 있습니다.
-    spawnTimer = 1.4 + Math.random() * 0.35;
+    spawnTimer = stage.minGap + Math.random() * stage.gapRandom;
   }
 
   for (const obstacle of obstacles) {
@@ -276,6 +307,12 @@ function update(dt) {
     if (!obstacle.counted && obstacle.x + obstacle.w < PLAYER.x) {
       obstacle.counted = true;
       passed += 1;
+      if (passed < TARGET && stageIndexFor(passed) !== currentStage) {
+        currentStage = stageIndexFor(passed);
+        showStageNotice(currentStage);
+        // 다음 단계 첫 장애물부터 새 출현 간격 적용
+        spawnTimer = STAGES[currentStage].minGap + Math.random() * STAGES[currentStage].gapRandom;
+      }
       updateHud();
       if (passed >= TARGET) {
         finish(true);
