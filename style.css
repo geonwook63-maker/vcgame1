@@ -9,3 +9,7 @@
 .stage-hud{text-align:center}.stage-hud strong{color:#6ee7ee}
 .stage-notice{position:absolute;z-index:2;top:14px;left:50%;transform:translate(-50%,-8px);pointer-events:none;opacity:0;transition:opacity .2s,transform .2s;white-space:nowrap;background:#091b34dd;color:#a6f8ff;border:1px solid #58dce8;border-radius:999px;padding:9px 17px;font-size:clamp(11px,2.2vw,16px);font-weight:800}
 .stage-notice.visible{opacity:1;transform:translate(-50%,0)}
+
+/* 거리 점수 강조: 우상단 숫자 표시 */
+.hud-item.right strong{color:#ffe08a;font-variant-numeric:tabular-nums;font-size:clamp(20px,3vw,28px)}
+.ranking-panel td:nth-child(3){font-weight:800;color:#ffe08a}

@@ -3,7 +3,7 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
-const statusEl = document.getElementById("status");
+const distanceScoreEl = document.getElementById("distanceScore");
 const progressEl = document.getElementById("progress");
 const overlay = document.getElementById("overlay");
 const overlayBadge = document.getElementById("overlayBadge");
@@ -32,8 +32,13 @@ function readRanking() {
       Number.isFinite(r.passed) && Number.isFinite(r.seconds) && typeof r.date === "string") : [];
   } catch { return []; }
 }
+// 이전 버전 기록에는 점수가 없으므로 0점으로 표시하고 보존합니다.
+function rankingScore(record) {
+  return Number.isFinite(record.score) && record.score >= 0 ? Math.floor(record.score) : 0;
+}
 function sortRanking(records) {
-  return records.sort((a, b) => b.passed - a.passed || a.seconds - b.seconds || a.date.localeCompare(b.date)).slice(0, 10);
+  return records.sort((a, b) => rankingScore(b) - rankingScore(a) ||
+    b.passed - a.passed || a.seconds - b.seconds || a.date.localeCompare(b.date)).slice(0, 10);
 }
 function renderRanking() {
   rankingBody.replaceChildren();
@@ -41,14 +46,14 @@ function renderRanking() {
   if (!ranking.length) {
     const row = rankingBody.insertRow();
     const cell = row.insertCell();
-    cell.colSpan = 6;
+    cell.colSpan = 7;
     cell.className = "ranking-empty";
     cell.textContent = "아직 기록이 없어요. 첫 번째 도전자가 되어 보세요!";
     return;
   }
   ranking.forEach((entry, i) => {
     const row = rankingBody.insertRow();
-    [String(i + 1), entry.name, entry.won ? "승리" : "패배", `${entry.passed}/${entry.target || 15}`, `${entry.seconds.toFixed(1)}초`, entry.date.slice(0, 10)].forEach(value => {
+    [String(i + 1), entry.name, rankingScore(entry).toLocaleString("ko-KR"), entry.won ? "승리" : "패배", `${entry.passed}/${entry.target || 15}`, `${entry.seconds.toFixed(1)}초`, entry.date.slice(0, 10)].forEach(value => {
       row.insertCell().textContent = value;
     });
   });
@@ -85,6 +90,9 @@ const H = canvas.height;
 const GROUND = 320;
 const STAGE_SIZE = 15;
 const TARGET = STAGE_SIZE * 3;
+// 실제 달린 월드 거리 10px당 1점. 정지/종료 중에는 점수가 오르지 않습니다.
+const PIXELS_PER_POINT = 10;
+function getScore() { return Math.floor(worldDistance / PIXELS_PER_POINT); }
 // 단계마다 속도와 장애물 출현 간격을 변경합니다.
 // 간격은 점프 체공 시간(약 0.79초)보다 충분히 길게 유지합니다.
 const STAGES = [
@@ -209,7 +217,6 @@ function reset() {
   noticeTimeout = 0;
   stageNotice.classList.remove("visible");
   updateHud();
-  statusEl.textContent = "준비";
   showOverlay("READY?", "달릴 준비 됐나요?", "장애물을 뛰어넘어 결승점까지 도달하세요.", "게임 시작");
 }
 
@@ -218,7 +225,6 @@ function start() {
   if (state === "running") return;
   reset();
   state = "running";
-  statusEl.textContent = "달리는 중";
   overlay.classList.add("hidden");
   showStageNotice(0);
   // 버튼 클릭으로 시작했을 때 첫 점프는 별도 입력으로 진행합니다.
@@ -240,13 +246,12 @@ function finish(won) {
   state = won ? "won" : "lost";
   stageNotice.classList.remove("visible");
   playEndSound(won);
-  finalRecord = { won, passed, target: TARGET, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
+  finalRecord = { won, score: getScore(), passed, target: TARGET, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
   recordPending = true;
   nicknameInput.value = "";
   recordMessage.textContent = "";
-  recordSummary.textContent = `${won ? "승리" : "패배"} · ${STAGES[currentStage].name} · 장애물 ${passed}/${TARGET}개 통과 · ${elapsed.toFixed(1)}초`;
+  recordSummary.textContent = `${won ? "승리" : "패배"} · ${STAGES[currentStage].name} · 장애물 ${passed}/${TARGET}개 통과 · 점수 ${getScore().toLocaleString("ko-KR")}점 · ${elapsed.toFixed(1)}초`;
   recordPanel.hidden = false;
-  statusEl.textContent = won ? "승리!" : "게임 오버";
   showOverlay(
     won ? "YOU WIN!" : "GAME OVER",
     won ? "완벽한 달리기!" : "장애물에 부딪혔어요!",
@@ -265,6 +270,7 @@ function showOverlay(badge, title, description, buttonLabel) {
 
 function updateHud() {
   scoreEl.textContent = passed;
+  distanceScoreEl.textContent = getScore().toLocaleString("ko-KR");
   progressEl.style.width = `${(passed / TARGET) * 100}%`;
   stageEl.textContent = `${currentStage + 1} / ${STAGES.length} (${passed - currentStage * STAGE_SIZE}/${STAGE_SIZE})`;
 }
@@ -279,6 +285,7 @@ function update(dt) {
   const stage = STAGES[currentStage];
   const speed = stage.speed;
   worldDistance += speed * dt;
+  distanceScoreEl.textContent = getScore().toLocaleString("ko-KR");
 
   velocityY += GRAVITY * dt;
   playerY += velocityY * dt;
