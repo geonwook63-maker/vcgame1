@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10172b" />
+  <meta name="description" content="스페이스바로 점프하여 장애물 15개를 넘는 점프 러너 게임" />
+  <title>점프 러너 | Jump Runner</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="heading">
+      <span class="eyebrow">ONE BUTTON ARCADE</span>
+      <h1>JUMP <span>RUNNER</span></h1>
+      <p>스페이스바로 점프! 장애물 15개를 넘으면 승리합니다.</p>
+    </header>
+
+    <section class="game-card" aria-label="점프 러너 게임">
+      <div class="hud">
+        <div class="hud-item"><span class="hud-label">통과한 장애물</span><strong><span id="score">0</span> <small>/ 15</small></strong></div>
+        <div class="hud-item right"><span class="hud-label">상태</span><strong id="status">준비</strong></div>
+      </div>
+      <div class="progress-track" aria-label="게임 진행도"><div id="progress" class="progress-fill"></div></div>
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="900" height="400" aria-label="자동으로 달리는 캐릭터가 장애물을 점프로 피하는 게임"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="overlay-panel">
+            <span id="overlayBadge" class="overlay-badge">READY?</span>
+            <h2 id="overlayTitle">달릴 준비 됐나요?</h2>
+            <p id="overlayText">장애물을 뛰어넘어 결승점까지 도달하세요.</p>
+            <button id="startButton" type="button">게임 시작 <span aria-hidden="true">→</span></button>
+            <span class="overlay-hint">스페이스바로 시작할 수도 있어요</span>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-bar">
+        <span><kbd>SPACE</kbd> 점프 / 시작 / 재시작</span>
+        <button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button>
+      </div>
+    </section>
+    <p class="footer-note">장애물에 부딪히면 게임 오버 · 공중에서는 추가 점프 불가</p>
+  </main>
+</body>
+</html>
