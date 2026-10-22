@@ -11,6 +11,7 @@ const overlayTitle = document.getElementById("overlayTitle");
 const overlayText = document.getElementById("overlayText");
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
+const soundButton = document.getElementById("soundButton");
 
 const W = canvas.width;
 const H = canvas.height;
@@ -30,6 +31,47 @@ let worldDistance = 0;
 let lastTime = 0;
 let elapsed = 0;
 
+// 외부 음원 파일 없이 브라우저에서 점프 효과음을 직접 생성합니다.
+// 브라우저의 자동재생 제한 때문에 최초 사용자 입력 후 AudioContext를 시작합니다.
+let audioContext = null;
+let soundEnabled = true;
+
+function prepareAudio() {
+  if (!soundEnabled) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    if (!audioContext) audioContext = new AudioContextClass();
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+  } catch (error) {
+    console.warn("효과음을 사용할 수 없습니다.", error);
+  }
+}
+
+function playJumpSound() {
+  if (!soundEnabled) return;
+  prepareAudio();
+  if (!audioContext || audioContext.state !== "running") return;
+  const now = audioContext.currentTime;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(330, now);
+  oscillator.frequency.exponentialRampToValueAtTime(720, now + 0.12);
+  oscillator.frequency.exponentialRampToValueAtTime(540, now + 0.20);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.23);
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+  oscillator.start(now);
+  oscillator.stop(now + 0.24);
+  oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+}
+
+
 function reset() {
   state = "ready";
   playerY = GROUND - PLAYER.h;
@@ -45,6 +87,7 @@ function reset() {
 }
 
 function start() {
+  prepareAudio();
   if (state === "running") return;
   reset();
   state = "running";
@@ -60,6 +103,7 @@ function jump() {
   }
   if (playerY >= GROUND - PLAYER.h - 0.5) {
     velocityY = JUMP_VELOCITY;
+    playJumpSound();
   }
 }
 
@@ -200,6 +244,12 @@ window.addEventListener("keydown", event => {
 });
 startButton.addEventListener("click", start);
 restartButton.addEventListener("click", start);
+soundButton.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  soundButton.textContent = soundEnabled ? "🔊 효과음 켜짐" : "🔇 효과음 꺼짐";
+  soundButton.setAttribute("aria-pressed", String(soundEnabled));
+  if (soundEnabled) prepareAudio();
+});
 
 reset();
 requestAnimationFrame(frame);
