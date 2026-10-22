@@ -94,6 +94,8 @@ const TARGET = STAGE_SIZE * 3;
 const PIXELS_PER_POINT = 10;
 const NORMAL_OBSTACLE_BONUS = 100;
 const SPECIAL_OBSTACLE_BONUS = 200;
+// 마지막 장애물 통과 후 결승선까지 추가로 달리는 거리(px)
+const FINISH_LINE_DISTANCE = 500;
 let obstacleBonusScore = 0;
 function getScore() { return Math.floor(worldDistance / PIXELS_PER_POINT) + obstacleBonusScore; }
 // 단계마다 속도와 장애물 출현 간격을 변경합니다.
@@ -133,6 +135,7 @@ let lastTime = 0;
 let elapsed = 0;
 let currentStage = 0;
 let spawned = 0;
+let finishLineX = null;
 
 // 외부 음원 파일 없이 브라우저에서 점프 효과음을 직접 생성합니다.
 // 브라우저의 자동재생 제한 때문에 최초 사용자 입력 후 AudioContext를 시작합니다.
@@ -247,6 +250,7 @@ function reset() {
   elapsed = 0;
   currentStage = 0;
   spawned = 0;
+  finishLineX = null;
   noticeTimeout = 0;
   stageNotice.classList.remove("visible");
   updateHud();
@@ -289,7 +293,7 @@ function finish(won) {
   showOverlay(
     won ? "YOU WIN!" : "GAME OVER",
     won ? "완벽한 달리기!" : "장애물에 부딪혔어요!",
-    won ? `3단계의 장애물 ${TARGET}개를 모두 통과했습니다!` : `${passed}개 통과! 다시 도전해 보세요.`,
+    won ? `장애물 ${TARGET}개와 결승선을 모두 통과했습니다!` : `${passed}개 통과! 다시 도전해 보세요.`,
     "다시 시작"
   );
 }
@@ -361,13 +365,24 @@ function update(dt) {
         spawnTimer = STAGES[currentStage].minGap + Math.random() * STAGES[currentStage].gapRandom;
       }
       updateHud();
-      if (passed >= TARGET) {
-        finish(true);
-        return;
+      if (passed >= TARGET && finishLineX === null) {
+        // 장애물 통과만으로 승리하지 않고, 조금 더 달려 결승선을 통과해야 합니다.
+        finishLineX = PLAYER.x + FINISH_LINE_DISTANCE;
+        stageNotice.textContent = "🏁 결승선까지 달리세요!";
+        stageNotice.classList.add("visible");
+        noticeTimeout = 1.6;
       }
     }
   }
   obstacles = obstacles.filter(o => o.x + o.w > -20);
+
+  if (finishLineX !== null) {
+    finishLineX -= speed * dt;
+    if (finishLineX <= PLAYER.x + PLAYER.w / 2) {
+      finish(true);
+      return;
+    }
+  }
 }
 
 function roundedRect(x, y, w, h, r, fill) {
@@ -421,6 +436,26 @@ function draw() {
       ctx.fillText("×2", obstacle.x + obstacle.w / 2, GROUND - obstacle.h / 2 + 5);
       ctx.textAlign = "start";
     }
+  }
+
+  // 장애물 45개를 모두 통과한 뒤에만 등장하는 체크무늬 결승선
+  if (finishLineX !== null && finishLineX > -30 && finishLineX < W + 30) {
+    const fx = Math.round(finishLineX);
+    ctx.fillStyle = "#e9f8ff";
+    ctx.fillRect(fx - 3, 74, 6, GROUND - 74);
+    const tile = 14;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        ctx.fillStyle = (row + col) % 2 === 0 ? "#f8fbff" : "#172440";
+        ctx.fillRect(fx + col * tile, 78 + row * tile, tile, tile);
+      }
+    }
+    roundedRect(fx - 53, 45, 111, 25, 6, "#0d203bcc");
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 15px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("FINISH", fx + 2, 63);
+    ctx.textAlign = "start";
   }
 
   const bob = state === "running" && velocityY === 0 ? Math.sin(elapsed * 18) * 2 : 0;
