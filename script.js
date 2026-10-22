@@ -48,7 +48,7 @@ function renderRanking() {
   }
   ranking.forEach((entry, i) => {
     const row = rankingBody.insertRow();
-    [String(i + 1), entry.name, entry.won ? "승리" : "패배", `${entry.passed}/15`, `${entry.seconds.toFixed(1)}초`, entry.date.slice(0, 10)].forEach(value => {
+    [String(i + 1), entry.name, entry.won ? "승리" : "패배", `${entry.passed}/${entry.target || 15}`, `${entry.seconds.toFixed(1)}초`, entry.date.slice(0, 10)].forEach(value => {
       row.insertCell().textContent = value;
     });
   });
@@ -83,8 +83,8 @@ clearRankingButton.addEventListener("click", () => {
 const W = canvas.width;
 const H = canvas.height;
 const GROUND = 320;
-const TARGET = 15;
-const STAGE_SIZE = 5;
+const STAGE_SIZE = 15;
+const TARGET = STAGE_SIZE * 3;
 // 단계마다 속도와 장애물 출현 간격을 변경합니다.
 // 간격은 점프 체공 시간(약 0.79초)보다 충분히 길게 유지합니다.
 const STAGES = [
@@ -117,6 +117,7 @@ let worldDistance = 0;
 let lastTime = 0;
 let elapsed = 0;
 let currentStage = 0;
+let spawned = 0;
 
 // 외부 음원 파일 없이 브라우저에서 점프 효과음을 직접 생성합니다.
 // 브라우저의 자동재생 제한 때문에 최초 사용자 입력 후 AudioContext를 시작합니다.
@@ -204,6 +205,7 @@ function reset() {
   worldDistance = 0;
   elapsed = 0;
   currentStage = 0;
+  spawned = 0;
   noticeTimeout = 0;
   stageNotice.classList.remove("visible");
   updateHud();
@@ -238,7 +240,7 @@ function finish(won) {
   state = won ? "won" : "lost";
   stageNotice.classList.remove("visible");
   playEndSound(won);
-  finalRecord = { won, passed, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
+  finalRecord = { won, passed, target: TARGET, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
   recordPending = true;
   nicknameInput.value = "";
   recordMessage.textContent = "";
@@ -248,7 +250,7 @@ function finish(won) {
   showOverlay(
     won ? "YOU WIN!" : "GAME OVER",
     won ? "완벽한 달리기!" : "장애물에 부딪혔어요!",
-    won ? "장애물 15개를 모두 통과했습니다!" : `${passed}개 통과! 다시 도전해 보세요.`,
+    won ? `3단계의 장애물 ${TARGET}개를 모두 통과했습니다!` : `${passed}개 통과! 다시 도전해 보세요.`,
     "다시 시작"
   );
 }
@@ -264,7 +266,7 @@ function showOverlay(badge, title, description, buttonLabel) {
 function updateHud() {
   scoreEl.textContent = passed;
   progressEl.style.width = `${(passed / TARGET) * 100}%`;
-  stageEl.textContent = `${currentStage + 1} / ${STAGES.length}`;
+  stageEl.textContent = `${currentStage + 1} / ${STAGES.length} (${passed - currentStage * STAGE_SIZE}/${STAGE_SIZE})`;
 }
 
 function update(dt) {
@@ -286,9 +288,10 @@ function update(dt) {
   }
 
   spawnTimer -= dt;
-  if (spawnTimer <= 0 && passed + obstacles.length < TARGET) {
+  if (spawnTimer <= 0 && spawned < (currentStage + 1) * STAGE_SIZE) {
     const height = 38 + Math.random() * 12;
     obstacles.push({ x: W + 30, w: 30, h: height, counted: false });
+    spawned += 1;
     // 일정한 최소 간격을 보장해 모든 장애물을 점프로 넘을 수 있습니다.
     spawnTimer = stage.minGap + Math.random() * stage.gapRandom;
   }
