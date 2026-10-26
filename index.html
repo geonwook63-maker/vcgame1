@@ -510,35 +510,53 @@ function drawObstacleSprite(obstacle) {
 }
 
 function draw() {
-  const sky = ctx.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0, "#182b50");
-  sky.addColorStop(1, "#344c78");
+  const sky = ctx.createLinearGradient(0, 0, 0, GROUND);
+  sky.addColorStop(0, "#65b9cf");
+  sky.addColorStop(0.65, "#f6d5a0");
+  sky.addColorStop(1, "#ffe5b1");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, W, H);
 
-  // 달리는 느낌을 주는 배경 장식
-  ctx.fillStyle = "#91b9ec18";
-  for (let i = 0; i < 7; i++) {
-    const x = ((i * 175 - worldDistance * 0.14) % 1100 + 1100) % 1100 - 100;
-    roundedRect(x, 140 + (i % 3) * 23, 115, 12, 7, "#a7c7fa22");
-  }
-  ctx.fillStyle = "#223656";
+  // 모바일 세로 화면에서도 태양을 하늘 높이에 맞춰 배치합니다.
+  const sunX = W * 0.77;
+  const sunY = GROUND * 0.24;
+  const glow = ctx.createRadialGradient(sunX, sunY, 24, sunX, sunY, 125);
+  glow.addColorStop(0, "#fff8d9aa");
+  glow.addColorStop(1, "#fff2be00");
+  ctx.fillStyle = glow;
+  ctx.fillRect(sunX - 125, sunY - 125, 250, 250);
+  ctx.fillStyle = "#fff3c5";
   ctx.beginPath();
-  ctx.moveTo(0, GROUND);
-  for (let x = 0; x <= W; x += 60) {
-    ctx.lineTo(x, GROUND - 50 + Math.sin((x + worldDistance * 0.12) / 95) * 16);
-  }
-  ctx.lineTo(W, GROUND);
-  ctx.closePath();
+  ctx.arc(sunX, sunY, 39, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#13233b";
+  // 먼 모래언덕은 천천히, 가까운 모래언덕은 조금 더 빠르게 흐릅니다.
+  for (const dune of [
+    { color: "#dfb47a", height: 148, amplitude: 33, wave: 190, speed: 0.06 },
+    { color: "#e9be78", height: 96, amplitude: 25, wave: 140, speed: 0.12 },
+    { color: "#f3ce88", height: 43, amplitude: 17, wave: 110, speed: 0.22 }
+  ]) {
+    ctx.fillStyle = dune.color;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND);
+    for (let x = 0; x <= W; x += 10) {
+      ctx.lineTo(x, GROUND - dune.height + Math.sin((x + worldDistance * dune.speed) / dune.wave) * dune.amplitude);
+    }
+    ctx.lineTo(W, GROUND);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const sand = ctx.createLinearGradient(0, GROUND, 0, H);
+  sand.addColorStop(0, "#e4b56d");
+  sand.addColorStop(1, "#c78e4e");
+  ctx.fillStyle = sand;
   ctx.fillRect(0, GROUND, W, H - GROUND);
-  ctx.fillStyle = "#6ad5ed";
-  ctx.fillRect(0, GROUND, W, 5);
-  for (let i = 0; i < 13; i++) {
-    const x = ((i * 95 - worldDistance * 0.7) % 1250 + 1250) % 1250 - 50;
-    roundedRect(x, GROUND + 39, 47, 4, 2, "#476181");
+  ctx.fillStyle = "#ffe0a1";
+  ctx.fillRect(0, GROUND, W, 4);
+  for (let i = 0; i < 24; i++) {
+    const x = ((i * 53 - worldDistance * 0.7) % 1272 + 1272) % 1272 - 40;
+    roundedRect(x, GROUND + 18 + (i % 3) * 21, 12 + (i % 4) * 6, 3, 1.5, "#af793c66");
   }
 
   for (const obstacle of obstacles) {
