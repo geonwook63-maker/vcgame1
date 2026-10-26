@@ -74,7 +74,7 @@
       </section>
       <div class="bottom-bar">
         <span>화면 터치 / <kbd>SPACE</kbd> 점프 · 공중에서 다시 누르면 2단 점프 / 시작 / 재시작</span>
-        <div class="bottom-actions"><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
+        <div class="bottom-actions"><button id="bgmButton" type="button" class="secondary-button" aria-pressed="false" aria-label="배경음악 음소거">♫ BGM 켜짐</button><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
       </div>
     </section>
     <p class="footer-note">45개 통과 후 체크무늬 결승선을 넘으면 승리 · 장애물에 부딪히면 게임 오버 · 보라색(높은 장애물), 주황색(긴 장애물)은 2단 점프로 통과!</p>
@@ -94,6 +94,7 @@ const overlayText = document.getElementById("overlayText");
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
 const soundButton = document.getElementById("soundButton");
+const bgmButton = document.getElementById("bgmButton");
 
 const recordPanel = document.getElementById("recordPanel");
 const recordForm = document.getElementById("recordForm");
@@ -223,6 +224,26 @@ let finishLineX = null;
 // 브라우저의 자동재생 제한 때문에 최초 사용자 입력 후 AudioContext를 시작합니다.
 let audioContext = null;
 let soundEnabled = true;
+let bgmMuted = false;
+const bgm = new Audio('sounds/bgm.mp3');
+bgm.loop = true;
+bgm.volume = 0.4;
+bgm.preload = 'auto';
+const failSound = new Audio('sounds/fail.mp3');
+failSound.preload = 'auto';
+// 재생 거부나 파일 오류가 게임 진행에 영향을 주지 않게 합니다.
+function playAudioFile(audio) {
+  const pending = audio.play();
+  if (pending) pending.catch(() => {});
+}
+function stopAudioFile(audio) {
+  audio.pause();
+  audio.currentTime = 0;
+}
+function startBgm() {
+  if (!bgmMuted) playAudioFile(bgm);
+}
+
 
 function prepareAudio() {
   if (!soundEnabled) return;
@@ -318,6 +339,8 @@ function createObstacle(type, stageIndex) {
 }
 
 function reset() {
+  stopAudioFile(bgm);
+  stopAudioFile(failSound);
   closeRecordPanel();
   state = "ready";
   playerY = GROUND - PLAYER.h;
@@ -344,6 +367,7 @@ function start() {
   if (state === "running") return;
   reset();
   state = "running";
+  startBgm();
   overlay.classList.add("hidden");
   showStageNotice(0);
   // 버튼 클릭으로 시작했을 때 첫 점프는 별도 입력으로 진행합니다.
@@ -365,7 +389,12 @@ function finish(won) {
   if (state !== "running") return; // 종료 효과음 중복 재생 방지
   state = won ? "won" : "lost";
   stageNotice.classList.remove("visible");
-  playEndSound(won);
+  stopAudioFile(bgm);
+  if (won) playEndSound(true);
+  else if (soundEnabled) {
+    stopAudioFile(failSound);
+    playAudioFile(failSound);
+  }
   finalRecord = { won, score: getScore(), passed, target: TARGET, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
   recordPending = true;
   nicknameInput.value = "";
@@ -640,11 +669,20 @@ window.addEventListener("keydown", event => {
 });
 startButton.addEventListener("click", start);
 restartButton.addEventListener("click", start);
+bgmButton.addEventListener("click", () => {
+  bgmMuted = !bgmMuted;
+  bgm.muted = bgmMuted;
+  bgmButton.textContent = bgmMuted ? '♫ BGM 꺼짐' : '♫ BGM 켜짐';
+  bgmButton.setAttribute('aria-pressed', String(bgmMuted));
+  if (bgmMuted) bgm.pause();
+  else if (state === 'running') startBgm();
+});
 soundButton.addEventListener("click", () => {
   soundEnabled = !soundEnabled;
   soundButton.textContent = soundEnabled ? "🔊 효과음 켜짐" : "🔇 효과음 꺼짐";
   soundButton.setAttribute("aria-pressed", String(soundEnabled));
   if (soundEnabled) prepareAudio();
+  else stopAudioFile(failSound);
 });
 
 reset();
