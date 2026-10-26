@@ -27,11 +27,14 @@
 .footer-note{color:#c0cce3;line-height:1.6}
 .canvas-wrap{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}button{touch-action:manipulation;min-height:44px}
 @media(max-width:600px){body{display:block;padding:0}.game-shell{width:100%}.heading{height:100px;margin:0;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;box-sizing:content-box}.eyebrow{font-size:9px}.heading h1{font-size:28px;margin:2px 0}.heading p{font-size:11px;line-height:1.5}.game-card{display:flex;flex-direction:column;border:0;border-radius:0;box-shadow:none}.hud{order:0;height:64px;padding:8px 12px;gap:8px}.hud-label{font-size:10px}.hud strong,.hud-item.right strong{font-size:18px}.progress-track{order:1;flex-shrink:0}.canvas-wrap{order:2;height:calc(100svh - 277px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:260px}canvas{width:100%;height:100%;aspect-ratio:auto}.bottom-bar{order:3;min-height:92px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));gap:4px}.bottom-bar>span{width:100%;text-align:center;font-size:10px}.bottom-bar kbd{padding:2px 4px}.bottom-actions{width:100%;justify-content:center}.record-panel{order:4}.ranking-panel{order:5}.overlay{padding:20px}.overlay h2{font-size:24px}.overlay p{font-size:13px;margin:12px 0 18px}.overlay button{font-size:16px;padding:12px 24px}.overlay-hint{font-size:11px;line-height:1.6;margin-top:12px}.footer-note{padding:0 14px 16px}}
+.top-controls{display:flex;justify-content:flex-end;align-items:center;min-height:44px}
+@media(max-width:600px){.top-controls{padding:env(safe-area-inset-top) 12px 0;min-height:calc(44px + env(safe-area-inset-top))}.heading{padding-top:8px}.canvas-wrap{height:calc(100svh - 321px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}}
 </style>
 
 </head>
 <body>
   <main class="game-shell">
+    <div class="top-controls" aria-label="배경음악 설정"><button id="bgmButton" type="button" class="secondary-button" aria-pressed="false" aria-label="배경음악 음소거">♫ BGM 켜짐</button></div>
     <header class="heading">
       <span class="eyebrow">ONE BUTTON ARCADE</span>
       <h1>JUMP <span>RUNNER</span></h1>
@@ -74,7 +77,7 @@
       </section>
       <div class="bottom-bar">
         <span>화면 터치 / <kbd>SPACE</kbd> 점프 · 공중에서 다시 누르면 2단 점프 / 시작 / 재시작</span>
-        <div class="bottom-actions"><button id="bgmButton" type="button" class="secondary-button" aria-pressed="false" aria-label="배경음악 음소거">♫ BGM 켜짐</button><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
+        <div class="bottom-actions"><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
       </div>
     </section>
     <p class="footer-note">45개 통과 후 체크무늬 결승선을 넘으면 승리 · 장애물에 부딪히면 게임 오버 · 보라색(높은 장애물), 주황색(긴 장애물)은 2단 점프로 통과!</p>
@@ -227,7 +230,7 @@ let soundEnabled = true;
 let bgmMuted = false;
 const bgm = new Audio('sounds/bgm.mp3');
 bgm.loop = true;
-bgm.volume = 0.4;
+bgm.volume = 0.22;
 bgm.preload = 'auto';
 const failSound = new Audio('sounds/fail.mp3');
 failSound.preload = 'auto';
@@ -271,7 +274,7 @@ function playJumpSound() {
   oscillator.frequency.exponentialRampToValueAtTime(720, now + 0.12);
   oscillator.frequency.exponentialRampToValueAtTime(540, now + 0.20);
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.23, now + 0.015);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.23);
   oscillator.connect(gain);
   gain.connect(audioContext.destination);
