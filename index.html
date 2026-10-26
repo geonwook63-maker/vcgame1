@@ -2,19 +2,40 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#10172b" />
   <meta name="description" content="스페이스바로 점프하여 장애물 45개를 넘는 점프 러너 게임" />
   <title>점프 러너 | Jump Runner</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="script.js" defer></script>
+  <style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#0b1020;color:#f6f8ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:30px 16px;background:radial-gradient(ellipse at 50% 0%,#202c52 0%,#0b1020 65%)}.game-shell{width:min(100%,980px)}.heading{text-align:center;margin-bottom:25px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:4px;color:#79b8ff}.heading h1{font-size:clamp(32px,6vw,54px);letter-spacing:2px;margin:8px 0 6px;font-weight:900}.heading h1 span{color:#57a5ff}.heading p{margin:0;color:#aebbd6;font-size:14px}.game-card{overflow:hidden;background:#131e36;border:1px solid #304265;border-radius:22px;box-shadow:0 22px 70px #0007}.hud{display:flex;justify-content:space-between;padding:18px 24px 14px;gap:16px}.hud-item{display:flex;flex-direction:column;gap:3px}.hud-item.right{text-align:right}.hud-label{color:#9caccd;font-size:12px}.hud strong{font-size:24px;font-variant-numeric:tabular-nums}.hud small{color:#8191b4;font-size:15px}.progress-track{height:5px;background:#293853}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#37d5dd,#579aff);transition:width .16s linear}.canvas-wrap{position:relative;overflow:hidden;background:#172440}canvas{display:block;width:100%;height:auto;aspect-ratio:9/4}.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0b1428bd;backdrop-filter:blur(4px);padding:15px}.overlay.hidden{display:none}.overlay-panel{text-align:center;max-width:400px}.overlay-badge{display:inline-block;border-radius:30px;background:#274f78;color:#8edaff;font-size:11px;font-weight:900;letter-spacing:2px;padding:8px 15px}.overlay h2{font-size:clamp(22px,4vw,36px);margin:13px 0 8px}.overlay p{font-size:14px;color:#c2cce2;line-height:1.6;margin:0 0 22px}.overlay button{background:#428cff;color:white;border:0;border-radius:11px;padding:13px 28px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 7px 25px #3989ff44}.overlay button:hover{background:#61a1ff}.overlay button:focus-visible,.secondary-button:focus-visible{outline:3px solid #b7e8ff;outline-offset:3px}.overlay-hint{display:block;font-size:12px;color:#9fb0d1;margin-top:12px}.bottom-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 24px;color:#b8c5de;font-size:13px}.bottom-bar kbd{display:inline-block;border:1px solid #65789c;border-bottom-width:3px;border-radius:5px;padding:5px 9px;font-family:inherit;font-weight:800;color:white;margin-right:6px}.secondary-button{background:#253754;border:1px solid #3e557a;color:#e7f1ff;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:700}.secondary-button:hover{background:#30486c}.footer-note{text-align:center;color:#788ba9;font-size:12px;margin-top:17px}@media(max-width:560px){body{padding:15px 10px}.heading{margin-bottom:18px}.heading p{font-size:12px}.hud{padding:12px 14px}.hud strong{font-size:19px}.bottom-bar{padding:12px 13px;font-size:11px}.bottom-bar kbd{padding:4px 5px}.secondary-button{padding:9px 10px;font-size:11px}.overlay h2{margin:7px 0 4px}.overlay p{font-size:11px;margin-bottom:9px}.overlay button{padding:8px 16px;font-size:12px}.overlay-hint{font-size:10px;margin-top:5px}.overlay-badge{padding:5px 10px;font-size:9px}}
+
+.bottom-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}@media(max-width:560px){.bottom-bar{flex-wrap:wrap}.bottom-actions{width:100%;justify-content:flex-end}}
+
+/* 플레이 기록 및 로컬 TOP 10 */
+[hidden]{display:none!important}.record-panel,.ranking-panel{padding:19px 24px;border-top:1px solid #304265}.record-panel{background:#1b2b46}.record-panel h2,.ranking-panel h2{margin:0 0 8px;font-size:19px}.record-panel p,.ranking-caption{font-size:12px;color:#b8c5de;margin:5px 0 13px}.record-form label{display:block;margin-bottom:8px;font-size:13px;font-weight:700}.record-controls{display:flex;gap:8px;flex-wrap:wrap}.record-controls input{flex:1;min-width:150px;background:#0b1428;color:#fff;border:1px solid #5b749d;border-radius:9px;padding:11px;font:inherit}.record-controls button{border:0;border-radius:9px;background:#428cff;color:#fff;padding:10px 15px;font-weight:800;cursor:pointer}.record-controls .secondary-button{background:#253754;border:1px solid #3e557a}.record-message{min-height:16px}.ranking-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.ranking-scroll{overflow-x:auto}.ranking-panel table{width:100%;border-collapse:collapse;font-size:13px;text-align:left;white-space:nowrap}.ranking-panel th,.ranking-panel td{padding:11px 9px;border-bottom:1px solid #304265}.ranking-panel th{color:#91acd1;font-size:11px}.ranking-panel td:nth-child(1){font-weight:800;color:#7dbbff}.ranking-panel td:nth-child(2){max-width:180px;overflow:hidden;text-overflow:ellipsis}.ranking-empty{text-align:center;color:#9caccd}.record-controls input:focus-visible,.record-controls button:focus-visible{outline:3px solid #b7e8ff;outline-offset:2px}@media(max-width:560px){.record-panel,.ranking-panel{padding:15px 12px}.ranking-panel table{font-size:11px}.ranking-panel th,.ranking-panel td{padding:9px 6px}}
+
+/* 3단계 난이도 및 단계 진입 알림 */
+.stage-hud{text-align:center}.stage-hud strong{color:#6ee7ee}
+.stage-notice{position:absolute;z-index:2;top:14px;left:50%;transform:translate(-50%,-8px);pointer-events:none;opacity:0;transition:opacity .2s,transform .2s;white-space:nowrap;background:#091b34dd;color:#a6f8ff;border:1px solid #58dce8;border-radius:999px;padding:9px 17px;font-size:clamp(11px,2.2vw,16px);font-weight:800}
+.stage-notice.visible{opacity:1;transform:translate(-50%,0)}
+
+/* 거리 점수 강조: 우상단 숫자 표시 */
+.hud-item.right strong{color:#ffe08a;font-variant-numeric:tabular-nums;font-size:clamp(20px,3vw,28px)}
+.ranking-panel td:nth-child(3){font-weight:800;color:#ffe08a}
+
+/* 2단 점프와 특수 장애물 안내 */
+.footer-note{color:#c0cce3;line-height:1.6}
+.canvas-wrap{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}button{touch-action:manipulation;min-height:44px}
+@media(max-width:600px){body{display:block;padding:0}.game-shell{width:100%}.heading{height:100px;margin:0;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;box-sizing:content-box}.eyebrow{font-size:9px}.heading h1{font-size:28px;margin:2px 0}.heading p{font-size:11px;line-height:1.5}.game-card{display:flex;flex-direction:column;border:0;border-radius:0;box-shadow:none}.hud{order:0;height:64px;padding:8px 12px;gap:8px}.hud-label{font-size:10px}.hud strong,.hud-item.right strong{font-size:18px}.progress-track{order:1;flex-shrink:0}.canvas-wrap{order:2;height:calc(100svh - 277px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:260px}canvas{width:100%;height:100%;aspect-ratio:auto}.bottom-bar{order:3;min-height:92px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));gap:4px}.bottom-bar>span{width:100%;text-align:center;font-size:10px}.bottom-bar kbd{padding:2px 4px}.bottom-actions{width:100%;justify-content:center}.record-panel{order:4}.ranking-panel{order:5}.overlay{padding:20px}.overlay h2{font-size:24px}.overlay p{font-size:13px;margin:12px 0 18px}.overlay button{font-size:16px;padding:12px 24px}.overlay-hint{font-size:11px;line-height:1.6;margin-top:12px}.footer-note{padding:0 14px 16px}}
+</style>
+
 </head>
 <body>
   <main class="game-shell">
     <header class="heading">
       <span class="eyebrow">ONE BUTTON ARCADE</span>
       <h1>JUMP <span>RUNNER</span></h1>
-      <p>스페이스바를 연속 두 번 눌러 2단 점프! 각 단계 15개씩 총 45개 장애물을 돌파한 뒤 결승선을 통과하세요.</p>
+      <p>화면 터치 또는 스페이스바로 점프 · 두 번 입력하면 2단 점프! 각 단계 15개씩 총 45개 장애물을 돌파한 뒤 결승선을 통과하세요.</p>
     </header>
 
     <section class="game-card" aria-label="점프 러너 게임">
@@ -33,7 +54,7 @@
             <h2 id="overlayTitle">달릴 준비 됐나요?</h2>
             <p id="overlayText">장애물을 뛰어넘어 결승점까지 도달하세요.</p>
             <button id="startButton" type="button">게임 시작 <span aria-hidden="true">→</span></button>
-            <span class="overlay-hint">스페이스바로 시작 · 연속 두 번 누르면 2단 점프</span>
+            <span class="overlay-hint">화면 터치 / 스페이스바로 시작 · 두 번 입력하면 2단 점프</span>
           </div>
         </div>
       </div>
@@ -52,11 +73,568 @@
         <div class="ranking-scroll"><table><thead><tr><th>순위</th><th>닉네임</th><th>점수</th><th>결과</th><th>통과</th><th>시간</th><th>날짜</th></tr></thead><tbody id="rankingBody"></tbody></table></div>
       </section>
       <div class="bottom-bar">
-        <span><kbd>SPACE</kbd> 점프 · 공중에서 다시 누르면 2단 점프 / 시작 / 재시작</span>
+        <span>화면 터치 / <kbd>SPACE</kbd> 점프 · 공중에서 다시 누르면 2단 점프 / 시작 / 재시작</span>
         <div class="bottom-actions"><button id="soundButton" type="button" class="secondary-button" aria-pressed="true">🔊 효과음 켜짐</button><button id="restartButton" type="button" class="secondary-button">↻ 처음부터</button></div>
       </div>
     </section>
     <p class="footer-note">45개 통과 후 체크무늬 결승선을 넘으면 승리 · 장애물에 부딪히면 게임 오버 · 보라색(높은 장애물), 주황색(긴 장애물)은 2단 점프로 통과!</p>
   </main>
+<script>
+"use strict";
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const distanceScoreEl = document.getElementById("distanceScore");
+const progressEl = document.getElementById("progress");
+const overlay = document.getElementById("overlay");
+const overlayBadge = document.getElementById("overlayBadge");
+const overlayTitle = document.getElementById("overlayTitle");
+const overlayText = document.getElementById("overlayText");
+const startButton = document.getElementById("startButton");
+const restartButton = document.getElementById("restartButton");
+const soundButton = document.getElementById("soundButton");
+
+const recordPanel = document.getElementById("recordPanel");
+const recordForm = document.getElementById("recordForm");
+const recordSummary = document.getElementById("recordSummary");
+const recordMessage = document.getElementById("recordMessage");
+const nicknameInput = document.getElementById("nickname");
+const skipRecordButton = document.getElementById("skipRecord");
+const rankingBody = document.getElementById("rankingBody");
+const clearRankingButton = document.getElementById("clearRanking");
+const RANKING_KEY = "jump-runner-ranking-v1";
+let recordPending = false;
+let finalRecord = null;
+
+function readRanking() {
+  try {
+    const data = JSON.parse(localStorage.getItem(RANKING_KEY) || "[]");
+    return Array.isArray(data) ? data.filter(r => r && typeof r.name === "string" &&
+      Number.isFinite(r.passed) && Number.isFinite(r.seconds) && typeof r.date === "string") : [];
+  } catch { return []; }
+}
+// 이전 버전 기록에는 점수가 없으므로 0점으로 표시하고 보존합니다.
+function rankingScore(record) {
+  return Number.isFinite(record.score) && record.score >= 0 ? Math.floor(record.score) : 0;
+}
+function sortRanking(records) {
+  return records.sort((a, b) => rankingScore(b) - rankingScore(a) ||
+    b.passed - a.passed || a.seconds - b.seconds || a.date.localeCompare(b.date)).slice(0, 10);
+}
+function renderRanking() {
+  rankingBody.replaceChildren();
+  const ranking = sortRanking(readRanking());
+  if (!ranking.length) {
+    const row = rankingBody.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 7;
+    cell.className = "ranking-empty";
+    cell.textContent = "아직 기록이 없어요. 첫 번째 도전자가 되어 보세요!";
+    return;
+  }
+  ranking.forEach((entry, i) => {
+    const row = rankingBody.insertRow();
+    [String(i + 1), entry.name, rankingScore(entry).toLocaleString("ko-KR"), entry.won ? "승리" : "패배", `${entry.passed}/${entry.target || 15}`, `${entry.seconds.toFixed(1)}초`, entry.date.slice(0, 10)].forEach(value => {
+      row.insertCell().textContent = value;
+    });
+  });
+}
+function closeRecordPanel() {
+  recordPending = false;
+  finalRecord = null;
+  recordPanel.hidden = true;
+}
+recordForm.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!recordPending || !finalRecord) return;
+  const name = nicknameInput.value.trim();
+  if (!name || name.length > 12) { recordMessage.textContent = "닉네임을 1~12자로 입력해 주세요."; return; }
+  const records = sortRanking([...readRanking(), { ...finalRecord, name }]);
+  try {
+    localStorage.setItem(RANKING_KEY, JSON.stringify(records));
+  } catch {
+    recordMessage.textContent = "저장할 수 없습니다. 브라우저 저장소 설정을 확인해 주세요.";
+    return;
+  }
+  closeRecordPanel();
+  renderRanking();
+});
+skipRecordButton.addEventListener("click", closeRecordPanel);
+clearRankingButton.addEventListener("click", () => {
+  if (!window.confirm("이 브라우저에 저장된 TOP 10 기록을 모두 삭제할까요?")) return;
+  try { localStorage.removeItem(RANKING_KEY); } catch { /* 접근 제한 시 무시 */ }
+  renderRanking();
+});
+
+const W = canvas.width;
+let H = canvas.height;
+let GROUND = 320;
+const STAGE_SIZE = 15;
+const TARGET = STAGE_SIZE * 3;
+// 실제 달린 월드 거리 10px당 1점. 정지/종료 중에는 점수가 오르지 않습니다.
+const PIXELS_PER_POINT = 10;
+const NORMAL_OBSTACLE_BONUS = 100;
+const SPECIAL_OBSTACLE_BONUS = 200;
+// 마지막 장애물 통과 후 결승선까지 추가로 달리는 거리(px)
+const FINISH_LINE_DISTANCE = 500;
+let obstacleBonusScore = 0;
+function getScore() { return Math.floor(worldDistance / PIXELS_PER_POINT) + obstacleBonusScore; }
+// 단계마다 속도와 장애물 출현 간격을 변경합니다.
+// 간격은 점프 체공 시간(약 0.79초)보다 충분히 길게 유지합니다.
+const STAGES = [
+  { name: "1단계 · 워밍업", speed: 300, minGap: 2.25, gapRandom: 0.30, special: 3 },
+  { name: "2단계 · 가속", speed: 365, minGap: 2.10, gapRandom: 0.25, special: 6 },
+  { name: "3단계 · 최종 도전", speed: 430, minGap: 2.00, gapRandom: 0.20, special: 8 }
+];
+const stageEl = document.getElementById("stage");
+const stageNotice = document.getElementById("stageNotice");
+let noticeTimeout = 0;
+function stageIndexFor(passedCount) {
+  return Math.min(STAGES.length - 1, Math.floor(passedCount / STAGE_SIZE));
+}
+function showStageNotice(index) {
+  stageNotice.textContent = `${STAGES[index].name} 시작!`;
+  stageNotice.classList.add("visible");
+  noticeTimeout = 1.8;
+}
+const GRAVITY = 1900;
+const JUMP_VELOCITY = -750;
+const SECOND_JUMP_VELOCITY = -750;
+const MAX_JUMPS = 2;
+const PLAYER = { x: 125, w: 42, h: 52 };
+
+let state = "ready";
+let playerY = GROUND - PLAYER.h;
+let velocityY = 0;
+let jumpsUsed = 0;
+let stagePlans = [];
+let obstacles = [];
+let passed = 0;
+let spawnTimer = 0;
+let worldDistance = 0;
+let lastTime = 0;
+let elapsed = 0;
+let currentStage = 0;
+let spawned = 0;
+let finishLineX = null;
+
+// 외부 음원 파일 없이 브라우저에서 점프 효과음을 직접 생성합니다.
+// 브라우저의 자동재생 제한 때문에 최초 사용자 입력 후 AudioContext를 시작합니다.
+let audioContext = null;
+let soundEnabled = true;
+
+function prepareAudio() {
+  if (!soundEnabled) return;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return;
+  try {
+    if (!audioContext) audioContext = new AudioContextClass();
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+  } catch (error) {
+    console.warn("효과음을 사용할 수 없습니다.", error);
+  }
+}
+
+function playJumpSound() {
+  if (!soundEnabled) return;
+  prepareAudio();
+  if (!audioContext || audioContext.state !== "running") return;
+  const now = audioContext.currentTime;
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(330, now);
+  oscillator.frequency.exponentialRampToValueAtTime(720, now + 0.12);
+  oscillator.frequency.exponentialRampToValueAtTime(540, now + 0.20);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.23);
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+  oscillator.start(now);
+  oscillator.stop(now + 0.24);
+  oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+}
+
+
+// 종료 효과음: 승리는 상승하는 3음, 패배는 하강하는 3음입니다.
+// 기존 효과음 ON/OFF 설정을 공통으로 적용합니다.
+function playEndSound(won) {
+  if (!soundEnabled) return;
+  prepareAudio();
+  if (!audioContext || audioContext.state !== "running") return;
+
+  const now = audioContext.currentTime;
+  const notes = won ? [523.25, 659.25, 783.99] : [392, 311.13, 196];
+  const duration = won ? 0.17 : 0.23;
+  const volume = won ? 0.12 : 0.11;
+
+  notes.forEach((frequency, index) => {
+    const startAt = now + index * duration;
+    const endAt = startAt + duration + 0.06;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = won ? "triangle" : "sine";
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, endAt);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(startAt);
+    oscillator.stop(endAt + 0.01);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      gain.disconnect();
+    };
+  });
+}
+
+
+// 단계마다 정확히 지정된 수의 특수 장애물을 섞어 배치합니다.
+// 게임을 다시 시작할 때마다 새로 셔플하여 순서가 달라집니다.
+function makeStagePlan(stageIndex) {
+  const specialCount = STAGES[stageIndex].special;
+  const types = Array(STAGE_SIZE - specialCount).fill("normal");
+  for (let i = 0; i < specialCount; i++) {
+    types.push(i % 2 === 0 ? "tall" : "wide");
+  }
+  for (let i = types.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [types[i], types[j]] = [types[j], types[i]];
+  }
+  return types;
+}
+
+function createObstacle(type, stageIndex) {
+  const speed = STAGES[stageIndex].speed;
+  if (type === "tall") return { type, x: W + 30, w: 36, h: 175, counted: false };
+  // 1단 점프의 전체 체공 시간보다 긴 폭: 2단 점프가 필요합니다.
+  if (type === "wide") return { type, x: W + 30, w: Math.round(speed * 0.91), h: 43, counted: false };
+  return { type, x: W + 30, w: 30, h: 38 + Math.random() * 12, counted: false };
+}
+
+function reset() {
+  closeRecordPanel();
+  state = "ready";
+  playerY = GROUND - PLAYER.h;
+  velocityY = 0;
+  jumpsUsed = 0;
+  stagePlans = STAGES.map((_, index) => makeStagePlan(index));
+  obstacles = [];
+  passed = 0;
+  spawnTimer = 1.35;
+  worldDistance = 0;
+  obstacleBonusScore = 0;
+  elapsed = 0;
+  currentStage = 0;
+  spawned = 0;
+  finishLineX = null;
+  noticeTimeout = 0;
+  stageNotice.classList.remove("visible");
+  updateHud();
+  showOverlay("READY?", "달릴 준비 됐나요?", "장애물을 뛰어넘어 결승점까지 도달하세요.", "게임 시작");
+}
+
+function start() {
+  prepareAudio();
+  if (state === "running") return;
+  reset();
+  state = "running";
+  overlay.classList.add("hidden");
+  showStageNotice(0);
+  // 버튼 클릭으로 시작했을 때 첫 점프는 별도 입력으로 진행합니다.
+}
+
+function jump() {
+  if (state !== "running") {
+    start();
+    return;
+  }
+  if (jumpsUsed < MAX_JUMPS) {
+    velocityY = jumpsUsed === 0 ? JUMP_VELOCITY : SECOND_JUMP_VELOCITY;
+    jumpsUsed += 1;
+    playJumpSound();
+  }
+}
+
+function finish(won) {
+  if (state !== "running") return; // 종료 효과음 중복 재생 방지
+  state = won ? "won" : "lost";
+  stageNotice.classList.remove("visible");
+  playEndSound(won);
+  finalRecord = { won, score: getScore(), passed, target: TARGET, stage: currentStage + 1, seconds: Math.round(elapsed * 10) / 10, date: new Date().toISOString() };
+  recordPending = true;
+  nicknameInput.value = "";
+  recordMessage.textContent = "";
+  recordSummary.textContent = `${won ? "승리" : "패배"} · ${STAGES[currentStage].name} · 장애물 ${passed}/${TARGET}개 통과 · 점수 ${getScore().toLocaleString("ko-KR")}점 · ${elapsed.toFixed(1)}초`;
+  recordPanel.hidden = false;
+  showOverlay(
+    won ? "YOU WIN!" : "GAME OVER",
+    won ? "완벽한 달리기!" : "장애물에 부딪혔어요!",
+    won ? `장애물 ${TARGET}개와 결승선을 모두 통과했습니다!` : `${passed}개 통과! 다시 도전해 보세요.`,
+    "다시 시작"
+  );
+}
+
+function showOverlay(badge, title, description, buttonLabel) {
+  overlayBadge.textContent = badge;
+  overlayTitle.textContent = title;
+  overlayText.textContent = description;
+  startButton.textContent = buttonLabel + " →";
+  overlay.classList.remove("hidden");
+}
+
+function updateHud() {
+  scoreEl.textContent = passed;
+  distanceScoreEl.textContent = getScore().toLocaleString("ko-KR");
+  progressEl.style.width = `${(passed / TARGET) * 100}%`;
+  stageEl.textContent = `${currentStage + 1} / ${STAGES.length} (${passed - currentStage * STAGE_SIZE}/${STAGE_SIZE})`;
+}
+
+function update(dt) {
+  if (state !== "running") return;
+  elapsed += dt;
+  if (noticeTimeout > 0) {
+    noticeTimeout -= dt;
+    if (noticeTimeout <= 0) stageNotice.classList.remove("visible");
+  }
+  const stage = STAGES[currentStage];
+  const speed = stage.speed;
+  worldDistance += speed * dt;
+  distanceScoreEl.textContent = getScore().toLocaleString("ko-KR");
+
+  velocityY += GRAVITY * dt;
+  playerY += velocityY * dt;
+  if (playerY > GROUND - PLAYER.h) {
+    playerY = GROUND - PLAYER.h;
+    velocityY = 0;
+    jumpsUsed = 0;
+  }
+
+  spawnTimer -= dt;
+  if (spawnTimer <= 0 && spawned < (currentStage + 1) * STAGE_SIZE) {
+    const stageSlot = spawned - currentStage * STAGE_SIZE;
+    const type = stagePlans[currentStage][stageSlot];
+    obstacles.push(createObstacle(type, currentStage));
+    spawned += 1;
+    // 일정한 최소 간격을 보장해 모든 장애물을 점프로 넘을 수 있습니다.
+    spawnTimer = stage.minGap + Math.random() * stage.gapRandom;
+  }
+
+  for (const obstacle of obstacles) {
+    obstacle.x -= speed * dt;
+    const margin = 7;
+    const overlap = PLAYER.x + PLAYER.w - margin > obstacle.x + margin &&
+      PLAYER.x + margin < obstacle.x + obstacle.w - margin &&
+      playerY + PLAYER.h - margin > GROUND - obstacle.h + margin &&
+      playerY + margin < GROUND - margin;
+    if (overlap) {
+      finish(false);
+      return;
+    }
+    if (!obstacle.counted && obstacle.x + obstacle.w < PLAYER.x) {
+      obstacle.counted = true;
+      passed += 1;
+      obstacleBonusScore += obstacle.type === "normal" ? NORMAL_OBSTACLE_BONUS : SPECIAL_OBSTACLE_BONUS;
+      if (passed < TARGET && stageIndexFor(passed) !== currentStage) {
+        currentStage = stageIndexFor(passed);
+        showStageNotice(currentStage);
+        // 다음 단계 첫 장애물부터 새 출현 간격 적용
+        spawnTimer = STAGES[currentStage].minGap + Math.random() * STAGES[currentStage].gapRandom;
+      }
+      updateHud();
+      if (passed >= TARGET && finishLineX === null) {
+        // 장애물 통과만으로 승리하지 않고, 조금 더 달려 결승선을 통과해야 합니다.
+        finishLineX = PLAYER.x + FINISH_LINE_DISTANCE;
+        stageNotice.textContent = "🏁 결승선까지 달리세요!";
+        stageNotice.classList.add("visible");
+        noticeTimeout = 1.6;
+      }
+    }
+  }
+  obstacles = obstacles.filter(o => o.x + o.w > -20);
+
+  if (finishLineX !== null) {
+    finishLineX -= speed * dt;
+    if (finishLineX <= PLAYER.x + PLAYER.w / 2) {
+      finish(true);
+      return;
+    }
+  }
+}
+
+function roundedRect(x, y, w, h, r, fill) {
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+}
+
+// 로딩 중이거나 파일을 읽지 못하면 기존 도형을 사용합니다.
+const sprites = {};
+for (const [name, file] of Object.entries({character: 'character_rectangle_red.png', normal: 'cactus.png', wide: 'castle.png', tall: 'castle.png'})) {
+  const image = new Image();
+  image.src = 'images/' + file;
+  sprites[name] = image;
+}
+function drawSprite(image, x, y, width, height) {
+  if (!image.complete || !image.naturalWidth || !image.naturalHeight) return false;
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+  const w = image.naturalWidth * scale;
+  const h = image.naturalHeight * scale;
+  ctx.drawImage(image, x + (width - w) / 2, y + height - h, w, h);
+  return true;
+}
+function drawObstacleSprite(obstacle) {
+  const image = sprites[obstacle.type];
+  if (!image.complete || !image.naturalWidth || !image.naturalHeight) return false;
+  const y = GROUND - obstacle.h;
+  if (obstacle.type === 'tall') {
+    // 같은 크기의 성 두 개를 빈틈없이 세로로 연결합니다.
+    const half = obstacle.h / 2;
+    const width = half * image.naturalWidth / image.naturalHeight;
+    const x = obstacle.x + (obstacle.w - width) / 2;
+    drawSprite(image, x, y, width, half);
+    drawSprite(image, x, y + half, width, half);
+  } else if (obstacle.type === 'wide') {
+    // 긴 충돌 영역도 눈에 보이도록 비율을 유지한 성을 가로로 연결합니다.
+    const count = Math.ceil(obstacle.w / (obstacle.h * image.naturalWidth / image.naturalHeight));
+    const width = obstacle.w / count;
+    for (let i = 0; i < count; i++) drawSprite(image, obstacle.x + i * width, y, width, obstacle.h);
+  } else {
+    drawSprite(image, obstacle.x, y, obstacle.w, obstacle.h);
+  }
+  return true;
+}
+
+function draw() {
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, "#182b50");
+  sky.addColorStop(1, "#344c78");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  // 달리는 느낌을 주는 배경 장식
+  ctx.fillStyle = "#91b9ec18";
+  for (let i = 0; i < 7; i++) {
+    const x = ((i * 175 - worldDistance * 0.14) % 1100 + 1100) % 1100 - 100;
+    roundedRect(x, 140 + (i % 3) * 23, 115, 12, 7, "#a7c7fa22");
+  }
+  ctx.fillStyle = "#223656";
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND);
+  for (let x = 0; x <= W; x += 60) {
+    ctx.lineTo(x, GROUND - 50 + Math.sin((x + worldDistance * 0.12) / 95) * 16);
+  }
+  ctx.lineTo(W, GROUND);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#13233b";
+  ctx.fillRect(0, GROUND, W, H - GROUND);
+  ctx.fillStyle = "#6ad5ed";
+  ctx.fillRect(0, GROUND, W, 5);
+  for (let i = 0; i < 13; i++) {
+    const x = ((i * 95 - worldDistance * 0.7) % 1250 + 1250) % 1250 - 50;
+    roundedRect(x, GROUND + 39, 47, 4, 2, "#476181");
+  }
+
+  for (const obstacle of obstacles) {
+    if (drawObstacleSprite(obstacle)) continue;
+    const color = obstacle.type === "tall" ? "#b77aff" : obstacle.type === "wide" ? "#ffb44d" : "#ff6585";
+    const highlight = obstacle.type === "tall" ? "#dfbaff" : obstacle.type === "wide" ? "#ffe1a5" : "#ff9bae";
+    roundedRect(obstacle.x, GROUND - obstacle.h, obstacle.w, obstacle.h, 5, color);
+    roundedRect(obstacle.x + 5, GROUND - obstacle.h + 6, Math.max(6, obstacle.w - 10), 6, 3, highlight);
+    if (obstacle.type !== "normal") {
+      ctx.fillStyle = "#172440";
+      ctx.font = "bold 15px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText("×2", obstacle.x + obstacle.w / 2, GROUND - obstacle.h / 2 + 5);
+      ctx.textAlign = "start";
+    }
+  }
+
+  // 장애물 45개를 모두 통과한 뒤에만 등장하는 체크무늬 결승선
+  if (finishLineX !== null && finishLineX > -30 && finishLineX < W + 30) {
+    const fx = Math.round(finishLineX);
+    ctx.fillStyle = "#e9f8ff";
+    ctx.fillRect(fx - 3, 74, 6, GROUND - 74);
+    const tile = 14;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        ctx.fillStyle = (row + col) % 2 === 0 ? "#f8fbff" : "#172440";
+        ctx.fillRect(fx + col * tile, 78 + row * tile, tile, tile);
+      }
+    }
+    roundedRect(fx - 53, 45, 111, 25, 6, "#0d203bcc");
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 15px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("FINISH", fx + 2, 63);
+    ctx.textAlign = "start";
+  }
+
+  const bob = state === "running" && velocityY === 0 ? Math.sin(elapsed * 18) * 2 : 0;
+  if (!drawSprite(sprites.character, PLAYER.x, playerY + bob, PLAYER.w, PLAYER.h)) {
+  roundedRect(PLAYER.x + 3, playerY + bob + 3, PLAYER.w, PLAYER.h, 9, "#09162b55");
+  roundedRect(PLAYER.x, playerY + bob, PLAYER.w, PLAYER.h, 9, "#52d8e6");
+  roundedRect(PLAYER.x + 9, playerY + bob + 12, 8, 8, 3, "#123454");
+  roundedRect(PLAYER.x + 28, playerY + bob + 12, 8, 8, 3, "#123454");
+  roundedRect(PLAYER.x + 16, playerY + bob + 32, 12, 4, 2, "#1688a9");
+  }
+}
+
+function frame(timestamp) {
+  const dt = Math.min((timestamp - (lastTime || timestamp)) / 1000, 0.033);
+  lastTime = timestamp;
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+
+// 세로 공간만 확장하여 기존 가로 시야와 점프 물리를 유지합니다.
+function resizeGame() {
+  const bounds = canvas.getBoundingClientRect();
+  if (!bounds.width) return;
+  const nextHeight = Math.max(400, Math.round(W * bounds.height / bounds.width));
+  playerY += nextHeight - 80 - GROUND;
+  H = nextHeight;
+  GROUND = H - 80;
+  canvas.height = H;
+}
+new ResizeObserver(resizeGame).observe(canvas.parentElement);
+resizeGame();
+// 합성 click과 중복되지 않도록 pointerdown으로만 점프합니다.
+canvas.parentElement.addEventListener("pointerdown", event => {
+  if (event.pointerType === "mouse" && event.button !== 0) return;
+  if (event.target.closest("button")) return;
+  event.preventDefault();
+  jump();
+});
+window.addEventListener("keydown", event => {
+  if (event.code !== "Space") return;
+  if (event.target instanceof HTMLElement && (event.target.closest("input, textarea, button, select") || event.target.isContentEditable)) return;
+  event.preventDefault();
+  if (event.repeat) return;
+  jump();
+});
+startButton.addEventListener("click", start);
+restartButton.addEventListener("click", start);
+soundButton.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  soundButton.textContent = soundEnabled ? "🔊 효과음 켜짐" : "🔇 효과음 꺼짐";
+  soundButton.setAttribute("aria-pressed", String(soundEnabled));
+  if (soundEnabled) prepareAudio();
+});
+
+reset();
+renderRanking();
+requestAnimationFrame(frame);
+
+</script>
 </body>
 </html>
