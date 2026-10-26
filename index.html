@@ -314,7 +314,7 @@ function createObstacle(type, stageIndex) {
   if (type === "tall") return { type, x: W + 30, w: 36, h: 175, counted: false };
   // 1단 점프의 전체 체공 시간보다 긴 폭: 2단 점프가 필요합니다.
   if (type === "wide") return { type, x: W + 30, w: Math.round(speed * 0.91), h: 43, counted: false };
-  return { type, x: W + 30, w: 30, h: 38 + Math.random() * 12, counted: false };
+  return { type, x: W + 30, w: 50, h: 60 + Math.random() * 12, counted: false };
 }
 
 function reset() {
@@ -476,7 +476,7 @@ function roundedRect(x, y, w, h, r, fill) {
 
 // 로딩 중이거나 파일을 읽지 못하면 기존 도형을 사용합니다.
 const sprites = {};
-for (const [name, file] of Object.entries({character: 'character_rectangle_red.png', normal: 'cactus.png', wide: 'castle.png', tall: 'castle.png'})) {
+for (const [name, file] of Object.entries({character: 'character_rectangle_red.png', normal: 'cactus.png', wide: 'castle.png', tall: 'column.png'})) {
   const image = new Image();
   image.src = 'images/' + file;
   sprites[name] = image;
@@ -494,12 +494,10 @@ function drawObstacleSprite(obstacle) {
   if (!image.complete || !image.naturalWidth || !image.naturalHeight) return false;
   const y = GROUND - obstacle.h;
   if (obstacle.type === 'tall') {
-    // 같은 크기의 성 두 개를 빈틈없이 세로로 연결합니다.
-    const half = obstacle.h / 2;
-    const width = half * image.naturalWidth / image.naturalHeight;
+    // 정사각형 원본의 투명 여백을 유지하면서 기둥 전체 높이를 맞춥니다.
+    const width = obstacle.h * image.naturalWidth / image.naturalHeight;
     const x = obstacle.x + (obstacle.w - width) / 2;
-    drawSprite(image, x, y, width, half);
-    drawSprite(image, x, y + half, width, half);
+    drawSprite(image, x, y, width, obstacle.h);
   } else if (obstacle.type === 'wide') {
     // 긴 충돌 영역도 눈에 보이도록 비율을 유지한 성을 가로로 연결합니다.
     const count = Math.ceil(obstacle.w / (obstacle.h * image.naturalWidth / image.naturalHeight));
